@@ -3,7 +3,7 @@
 [![](https://img.shields.io/npm/v/miniprogram-barrage)](https://www.npmjs.com/package/miniprogram-barrage)
 [![](https://img.shields.io/npm/l/miniprogram-barrage)](https://github.com/wechat-miniprogram/miniprogram-barrage)
 
-小程序弹幕组件。通过 view 的 transform 移动弹幕，覆盖在 原生组件上时，请确保组件已经同层化。[参考用例]()
+小程序弹幕组件。通过 view 的 transform 移动弹幕，覆盖在 原生组件上时，请确保组件已经同层化。[参考用例](https://developers.weixin.qq.com/s/fCP8KXmg70bQ)
 
 
 ## 使用方法
