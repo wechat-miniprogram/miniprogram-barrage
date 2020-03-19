@@ -12,8 +12,8 @@
 		"nodeModules": true
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.2.3",
-	"appid": "",
+	"libVersion": "2.10.3",
+	"appid": "wxfabc8fbd43db56f6",
 	"projectname": "miniprogram-demo",
 	"isGameTourist": false,
 	"condition": {

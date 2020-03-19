@@ -3,6 +3,7 @@ const {substring, getRandom, getFontSize} = require('./utils')
 class Bullet {
   constructor(opt = {}) {
     this.bulletId = opt.bulletId
+    this.addContent(opt)
   }
 
   /**
@@ -46,6 +47,7 @@ class Tunnel {
       bulletStatus: [], // 0 空闲，1 占用中
       disabled: false, // 禁用中
       sending: false, // 弹幕正在发送
+      timer: null, // 定时器
     }
     Object.assign(this, defaultTunnelOpt, opt)
     this.bulletStatus = new Array(this.maxNum).fill(0)
@@ -76,10 +78,18 @@ class Tunnel {
     this.sending = false
     this.bulletStatus = new Array(this.maxNum).fill(0)
     this.bullets.forEach(bullet => bullet.removeContent())
+    if (this.timer) {
+      clearTimeout(this.timer)
+    }
   }
 
   getIdleBulletIdx() {
-    return this.bulletStatus.indexOf(0)
+    let idle = this.bulletStatus.indexOf(0, this.last + 1)
+    if (idle === -1) {
+      idle = this.bulletStatus.indexOf(0)
+    }
+
+    return idle
   }
 
   getIdleBulletNum() {
@@ -144,24 +154,6 @@ class Barrage {
       }).exec()
     })
   }
-
-  resize() {
-    return this._promise.then(() => {
-      const query = this.comp.createSelectorQuery()
-      query.select('.barrage-area').boundingClientRect((res) => {
-        this.width = res.width
-        this.height = res.height
-        const isActive = this._isActive
-        this.close(() => {
-          this.init()
-          if (isActive) {
-            setTimeout(() => { this.open() }, 2000)
-          }
-        })
-      }).exec()
-    })
-  }
-
 
   init() {
     this.fontSize = getFontSize(this.font)
@@ -277,6 +269,7 @@ class Barrage {
   addData(data = []) {
     return this._promise.then(() => {
       if (!this._isActive) return
+
       data.forEach(item => {
         item.content = substring(item.content, this.maxLength)
         this.addBullet2Tunnel(item)
@@ -317,6 +310,8 @@ class Barrage {
     const self = this
     const query = this.comp.createSelectorQuery()
     query.selectAll('.bullet-item').boundingClientRect((res) => {
+      if (!this._isActive) return
+
       for (let i = 0; i < res.length; i++) {
         const {tunnelid, bulletid} = res[i].dataset
         const tunnel = self.tunnels[tunnelid]
@@ -335,26 +330,28 @@ class Barrage {
   }
 
   tunnelAnimate(tunnel) {
-    if (tunnel.disabled || tunnel.sending) return
+    if (tunnel.disabled || tunnel.sending || !this._isActive) return
 
     const next = (tunnel.last + 1) % tunnel.maxNum
     const bullet = tunnel.bullets[next]
 
     if (!bullet) return
 
-    if (bullet.content || bullet.image) {
+    if (bullet.content || bullet.image.head || bullet.image.tail) {
       tunnel.sending = true
       tunnel.last = next
-      const duration = this.distance * this.duration / (this.distance + bullet.width)
+      let duration = this.duration
+      if (this.mode === 'overlap') {
+        duration = this.distance * this.duration / (this.distance + bullet.width)
+      }
       const passDistance = bullet.width + tunnel.safeGap
-      bullet.duration = this.mode === 'overlap' ? duration : this.duration
+      bullet.duration = duration
       // 等上一条通过右边界
       bullet.passtime = Math.ceil(passDistance * bullet.duration * 1000 / this.distance)
-
       this.comp.setData({
         [`tunnels[${tunnel.tunnelId}].bullets[${bullet.bulletId}]`]: bullet
       }, () => {
-        setTimeout(() => {
+        tunnel.timer = setTimeout(() => {
           tunnel.sending = false
           this.tunnelAnimate(tunnel)
         }, bullet.passtime)

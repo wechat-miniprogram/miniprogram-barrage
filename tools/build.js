@@ -83,6 +83,7 @@ function js(jsFileMap, scope) {
  * 拷贝文件
  */
 function copy(copyFileList) {
+  console.log('copyFileList', copyFileList)
   if (!copyFileList.length) return false
 
   return gulp.src(copyFileList, {cwd: srcPath, base: srcPath})

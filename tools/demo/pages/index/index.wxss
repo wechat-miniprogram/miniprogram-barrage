@@ -1,0 +1,13 @@
+.barrage {
+  width: 100%;
+  height: 1000%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: #ccc;
+  box-sizing: border-box;
+}
+
+.video {
+  width: 100%;
+}
