@@ -10,7 +10,7 @@
   autoplay 
   enable-play-gesture
 >
-  <barrage class="barrage" renderingMode="dom"></barrage>
+  <barrage class="barrage" renderingMode="canvas"></barrage>
 </video>
 
 <button type="primary" bindtap="toggleDanmu">{{open ? '关闭' : '开启'}}弹幕</button>

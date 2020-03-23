@@ -12,38 +12,63 @@ class Bullet {
       x: 0,
       y: 0,
       tunnelId: 0,
-      // 弹幕图片结构
-      // {
-      //   image, // 图片资源
-      //   dWidth, // 绘制宽度
-      //   dHeight, // 绘制高度
-      //   position // 显示位置，弹幕开头(head)、结尾(tail)
-      //   gap // 与弹幕文字的距离，默认4
+      // image: {
+      //   head: {src, width, height}, // 弹幕头部添加图片
+      //   tail: {src, width, height}, // 弹幕尾部添加图片
+      //   gap: 4 // 图片与文本间隔
       // }
-      images: []
+      image: {},
+      imageHead: null, // Image 对象
+      imageTail: null,
       // status: 0 //0:待播放 1: 未完全进入屏幕 2: 完全进入屏幕 3: 完全退出屏幕
     }
     Object.assign(this, defaultBulletOpt, opt)
 
     this.barrage = barrage
     this.ctx = barrage.ctx
+    this.canvas = barrage.canvas
   }
 
   move() {
-    this.images.forEach(item => {
-      const {
-        image,
-        dWidth = this.fontSize,
-        dHeight = this.fontSize,
-        position = 'head',
-        gap = 4
-      } = item
-      const x = position === 'tail' ? this.x + this.textWidth + gap : this.x - gap - dWidth
-      const y = this.y - 0.5 * dHeight
-      this.ctx.drawImage(image, x, y, dWidth, dHeight)
-    })
-    this.x = this.x - this.speed
+    const imageGap = this.image.gap || 4
 
+    if (this.image.head && !this.imageHead) {
+      const Image = this.canvas.createImage()
+      Image.src = this.image.head.src
+      Image.onLoad = () => {
+        this.imageHead = Image
+      }
+    }
+
+    if (this.image.tail && !this.imageTail) {
+      const Image = this.canvas.createImage()
+      Image.src = this.image.tail.src
+      Image.onLoad = () => {
+        this.imageTail = Image
+      }
+    }
+
+    if (this.imageHead) {
+      const {
+        width = this.fontSize,
+        height = this.fontSize
+      } = this.image.head
+      const x = this.x - imageGap - width
+      const y = this.y - 0.5 * height
+      this.ctx.drawImage(this.imageHead, x, y, width, height)
+    }
+
+    if (this.imageTail) {
+      const {
+        width = this.fontSize,
+        height = this.fontSize
+      } = this.image.head
+      const x = this.x + this.textWidth + imageGap
+      const y = this.y - 0.5 * height
+      this.ctx.drawImage(this.imageTail, x, y, width, height)
+    }
+
+    this.x = this.x - this.speed
     this.ctx.fillStyle = this.color
     this.ctx.fillText(this.content, this.x, this.y)
   }
@@ -55,8 +80,8 @@ class Tunnel {
     const defaultTunnelOpt = {
       activeQueue: [], // 正在屏幕中列表
       nextQueue: [], // 待播放列表
-      maxNum: 10,
-      freeNum: 10, // 剩余可添加量
+      maxNum: 30,
+      freeNum: 30, // 剩余可添加量
       height: 0,
       width: 0,
       disabled: false,
@@ -84,6 +109,7 @@ class Tunnel {
     this.nextQueue = []
     this.sending = false
     this.freeNum = this.maxNum
+    this.barrage.addIdleTunnel(this.tunnelId)
   }
 
   addBullet(bullet) {
@@ -127,44 +153,57 @@ class Tunnel {
 
 class Barrage {
   constructor(opt = {}) {
-    this._promise = new Promise((resolve, reject) => {
-      const defaultBarrageOpt = {
-        font: '10px sans-serif',
-        duration: 10, // 弹幕屏幕停留时长
-        lineHeight: 1.2,
-        padding: [0, 0, 0, 0],
-        tunnelHeight: 0,
-        tunnelNum: 0,
-        tunnelMaxNum: 30, // 隧道最大缓冲长度
-        maxLength: 30, // 最大字节长度，汉字算双字节
-        safeArea: 4, // 发送时的安全间隔
-        tunnels: [],
-        idleTunnels: [],
-        enableTunnels: [],
-        alpha: 1, // 全局透明度
-        mode: 'separate', // 弹幕重叠 overlap  不重叠 separate
-        range: [0, 1], // 弹幕显示的垂直范围，支持两个值。[0,1]表示弹幕整个随机分布，
-        fps: 60, // 刷新率
-        tunnelShow: false, // 显示轨道线
-        comp: null, // 组件实例
-      }
-      Object.assign(this, defaultBarrageOpt, opt)
-      const systemInfo = wx.getSystemInfoSync()
-      this.ratio = systemInfo.pixelRatio
-      this.selector = '#weui-canvas'
+    const defaultBarrageOpt = {
+      font: '10px sans-serif',
+      duration: 10, // 弹幕屏幕停留时长
+      lineHeight: 1.2,
+      padding: [0, 0, 0, 0],
+      tunnelHeight: 0,
+      tunnelNum: 0,
+      tunnelMaxNum: 30, // 隧道最大缓冲长度
+      maxLength: 30, // 最大字节长度，汉字算双字节
+      safeArea: 4, // 发送时的安全间隔
+      tunnels: [],
+      idleTunnels: [],
+      enableTunnels: [],
+      alpha: 1, // 全局透明度
+      mode: 'separate', // 弹幕重叠 overlap  不重叠 separate
+      range: [0, 1], // 弹幕显示的垂直范围，支持两个值。[0,1]表示弹幕整个随机分布，
+      fps: 60, // 刷新率
+      tunnelShow: false, // 显示轨道线
+      comp: null, // 组件实例
+    }
+    Object.assign(this, defaultBarrageOpt, opt)
+    const systemInfo = wx.getSystemInfoSync()
+    this.ratio = systemInfo.pixelRatio
+    this.selector = '#weui-canvas'
+    this._ready = false
+    this._deferred = []
 
-      const query = this.comp.createSelectorQuery()
-      query.select(this.selector).boundingClientRect()
-      query.select(this.selector).node()
-      query.exec((res) => {
-        this.canvas = res[1].node
-        this.init(res[0])
-        if (this.canvas) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
+    const query = this.comp.createSelectorQuery()
+    query.select(this.selector).boundingClientRect()
+    query.select(this.selector).node()
+    query.exec((res) => {
+      this.canvas = res[1].node
+      this.init(res[0])
+      this.ready()
+    })
+  }
+
+  ready() {
+    this._ready = true
+    this._deferred.forEach(item => {
+      // eslint-disable-next-line prefer-spread
+      this[item.callback].apply(this, item.args)
+    })
+
+    this._deferred = []
+  }
+
+  _delay(method, args) {
+    this._deferred.push({
+      callback: method,
+      args
     })
   }
 
@@ -214,139 +253,138 @@ class Barrage {
 
   // 设置显示范围 range: [0,1]
   setRange(range) {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      range = range || this.range
-      const top = range[0] * this.tunnelNum
-      const bottom = range[1] * this.tunnelNum
+    if (!this._ready) {
+      this._delay('setRange', range)
+      return
+    }
 
-      // 释放符合要求的隧道
-      // 找到目前空闲的隧道
-      const idleTunnels = []
-      const enableTunnels = []
-      this.tunnels.forEach((tunnel, tunnelId) => {
-        if (tunnelId >= top && tunnelId < bottom) {
-          tunnel.enable()
-          enableTunnels.push(tunnelId)
-          if (this.idleTunnels.indexOf(tunnelId) >= 0) {
-            idleTunnels.push(tunnelId)
-          }
-        } else {
-          tunnel.disable()
+    range = range || this.range
+    const top = range[0] * this.tunnelNum
+    const bottom = range[1] * this.tunnelNum
+
+    // 释放符合要求的隧道
+    // 找到目前空闲的隧道
+    const idleTunnels = []
+    const enableTunnels = []
+    this.tunnels.forEach((tunnel, tunnelId) => {
+      if (tunnelId >= top && tunnelId < bottom) {
+        tunnel.enable()
+        enableTunnels.push(tunnelId)
+        if (this.idleTunnels.indexOf(tunnelId) >= 0) {
+          idleTunnels.push(tunnelId)
         }
-      })
-      this.idleTunnels = idleTunnels
-      this.enableTunnels = enableTunnels
-      this.range = range
+      } else {
+        tunnel.disable()
+      }
     })
+    this.idleTunnels = idleTunnels
+    this.enableTunnels = enableTunnels
+    this.range = range
   }
 
   setFont(font) {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      if (typeof font !== 'string') return
+    if (!this._ready) {
+      this._delay('setFont', font)
+      return
+    }
 
-      this.font = font
-      this.fontSize = getFontSize(this.font)
-      this.ctx.font = font
-    })
+    this.font = font
+    this.fontSize = getFontSize(this.font)
+    this.ctx.font = font
   }
 
   setAlpha(alpha) {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      if (typeof alpha !== 'number') return
+    if (!this._ready) {
+      this._delay('setAlpha', alpha)
+      return
+    }
 
-      this.alpha = alpha
-      this.ctx.globalAlpha = alpha
-    })
+    this.alpha = alpha
+    this.ctx.globalAlpha = alpha
   }
 
   setDuration(duration) {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      if (typeof duration !== 'number') return
+    if (!this._ready) {
+      this._delay('setDuration', duration)
+      return
+    }
 
-      this.clear()
-      this.duration = duration
-      this.innerDuration = this.transfromDuration2Canvas(duration)
-    })
+    this.clear()
+    this.duration = duration
+    this.innerDuration = this.transfromDuration2Canvas(duration)
   }
 
   // 开启弹幕
   open() {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      if (this._isActive) return
-      this._isActive = true
-      this.play()
-    })
+    if (!this._ready) {
+      this._delay('open')
+      return
+    }
+
+    if (this._isActive) return
+    this._isActive = true
+    this.play()
   }
 
   // 关闭弹幕，清除所有数据
   close() {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      this._isActive = false
-      this.pause()
-      this.clear()
-    })
+    if (!this._ready) {
+      this._delay('close')
+      return
+    }
+
+    if (!this._isActive) return
+    this._isActive = false
+    this.pause()
+    this.clear()
   }
 
   // 开启弹幕滚动
   play() {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      this._rAFId = this.canvas.requestAnimationFrame(() => {
-        this.animate()
-        this.play()
-      })
+    this._rAFId = this.canvas.requestAnimationFrame(() => {
+      this.animate()
+      this.play()
     })
   }
 
   // 停止弹幕滚动
   pause() {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      if (typeof this._rAFId === 'number') {
-        this.canvas.cancelAnimationFrame(this._rAFId)
-      }
-      if (typeof this._timer === 'number') {
-        clearInterval(this._timer)
-      }
-    })
+    if (typeof this._rAFId === 'number') {
+      this.canvas.cancelAnimationFrame(this._rAFId)
+    }
   }
 
   // 清空屏幕和缓冲的数据
   clear() {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      this.ctx.clearRect(0, 0, this.width, this.height)
-      this.tunnels.forEach(tunnel => tunnel.clear())
-    })
+    this.ctx.clearRect(0, 0, this.width, this.height)
+    this.tunnels.forEach(tunnel => tunnel.clear())
   }
 
   // 添加一批弹幕，轨道满时会被丢弃
   addData(data = []) {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      if (!this._isActive) return
-      data.forEach(item => this.addBullet2Tunnel(item))
-    })
+    if (!this._ready) {
+      this._delay('addData', data)
+      return
+    }
+
+    if (!this._isActive) return
+    data.forEach(item => this.addBullet2Tunnel(item))
   }
 
   // 发送一条弹幕
   // 为保证发送成功，选取一条可用隧道，替换待发送队列队头元素
   send(opt = {}) {
-    // eslint-disable-next-line promise/catch-or-return
-    this._promise.then(() => {
-      const tunnel = this.getEnableTunnel()
-      if (tunnel === null) return
+    if (!this._ready) {
+      this._delay('send', opt)
+      return
+    }
 
-      opt.tunnelId = tunnel.tunnelId
-      const bullet = this.registerBullet(opt)
-      tunnel.nextQueue[0] = bullet
-    })
+    const tunnel = this.getEnableTunnel()
+    if (tunnel === null) return
+
+    opt.tunnelId = tunnel.tunnelId
+    const bullet = this.registerBullet(opt)
+    tunnel.nextQueue[0] = bullet
   }
 
   // 添加至轨道 {content, color}

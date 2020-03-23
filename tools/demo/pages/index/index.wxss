@@ -11,8 +11,3 @@
 .video {
   width: 100%;
 }
-
-.barrage-area {
-  width: 100%;
-  height: 100%;
-}
