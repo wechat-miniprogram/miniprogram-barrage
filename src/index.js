@@ -7,6 +7,11 @@ Component({
   },
 
   properties: {
+    zIndex: {
+      type: Number,
+      value: 10
+    },
+
     renderingMode: {
       type: String,
       value: 'canvas'

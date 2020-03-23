@@ -1,13 +1,88 @@
-.barrage {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  left: 0;
-  top: 0;
-  background-color: #ccc;
-  box-sizing: border-box;
+@import "../../assets/iconfont.wxss"
+
+.iconfont {
+  display: inline-block;
+  cursor: pointer;
+  font-size: 28px;
+  margin-right: 8px;
 }
 
 .video {
   width: 100%;
+  height: 240px;
+}
+
+.barrage {
+  width: 100%;
+  height: 60%;
+}
+
+.switch-container {
+  position: absolute;
+  right: 20px;
+  bottom: 40px;
+}
+
+.barrage-switch {
+  width: 20px;
+  height: 20px;
+}
+
+.container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 101;
+}
+
+.block {
+  display: inline-block;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.send-box {
+  margin-top: 10px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  display: inline-block;
+  width: 100%;
+  height: 60px;
+  border: 1px solid #ccc;
+}
+
+.setting {
+  box-sizing: border-box;
+  width: 200px;
+  background: rgba(0, 0, 0, 0.4);
+  color:#fff !important;
+  font-size: 13px;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 4px;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  margin: 10px 0;
+}
+
+.setting-item .item-left {
+  width: 80px;
+}
+
+.slider {
+  width: 100px;
+  padding: 0;
+  margin: 0;
 }

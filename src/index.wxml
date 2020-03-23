@@ -1,8 +1,8 @@
-<view wx:if="{{renderingMode === 'canvas'}}" class="barrage-area">
+<view wx:if="{{renderingMode === 'canvas'}}" class="barrage-area" style="z-index: {{zIndex}};">
   <canvas type="2d" id="weui-canvas" style="width: 100%; height: 100%;"></canvas>
 </view>
 
-<view wx:else class="barrage-area" style="opacity: {{alpha}}; font: {{font}}; padding: {{padding}}">
+<view wx:else class="barrage-area" style="opacity: {{alpha}}; font: {{font}}; padding: {{padding}}; z-index: {{zIndex}};">
   <block wx:for="{{tunnels}}" wx:key="tunnelId" wx:for-item="tunnel" wx:for-index="tunnelId">
     <view class="barrage-tunnel" style="height: {{tunnel.height}}px; border-top-width: {{tunnelShow ? 1 : 0}}px">
       <view class="tunnel-tips" hidden="{{!tunnelShow}}">轨道{{tunnelId}}</view>
@@ -18,16 +18,17 @@
           <image 
             wx:if="{{bullet.image.head}}" 
             class="bullet-item_img" 
-            style="width: {{bullet.image.head.width}}px; height: {{bullet.image.head.height}}px" 
-            mode="aspectFit" src="{{bullet.image.head.src}}"
+            style="width: {{bullet.image.head.width || fontSize}}px; height: {{bullet.image.head.height}}px; margin-right: {{bullet.image.head.gap || 4}}px;" 
+            mode="aspectFit" 
+            src="{{bullet.image.head.src}}"
           ></image>
-          <view class="bullet-item_text" style="margin:0 {{bullet.image.gap}}px; opacity: 1">
+          <view class="bullet-item_text" style="opacity: 1;">
             <text>{{bullet.content}}</text>
           </view>
           <image 
             wx:if="{{bullet.image.tail}}" 
             class="bullet-item_img" 
-            style="width: {{bullet.image.tail.width}}px; height: {{bullet.image.tail.height}}px" 
+            style="width: {{bullet.image.tail.width || fontSize}}px; height: {{bullet.image.tail.height}}px; margin-left: {{bullet.image.tail.gap || 4}}px;" 
             mode="aspectFit" 
             src="{{bullet.image.tail.src}}"
           ></image>

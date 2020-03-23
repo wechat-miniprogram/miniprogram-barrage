@@ -192,6 +192,7 @@ class Barrage {
       }))
     }
     this.comp.setData({
+      fontSize: this.fontSize,
       tunnelShow: this.tunnelShow,
       tunnels: this.tunnels,
       font: this.font,
@@ -321,8 +322,9 @@ class Barrage {
       this._delay('send', opt)
       return
     }
+    const tunnel = this.getEnableTunnel()
+    if (tunnel === null) return
 
-    if (this.enableTunnels.size === 0) return
     const timer = setInterval(() => {
       const tunnel = this.getIdleTunnel()
       if (tunnel) {

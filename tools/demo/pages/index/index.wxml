@@ -1,7 +1,7 @@
 <video 
   id="myVideo" 
   class="video" 
-  src="{{}}" 
+  src="{{src}}"
   loop 
   controls 
   bindfullscreenchange="fullscreenchange" 
@@ -11,6 +11,46 @@
   enable-play-gesture
 >
   <barrage class="barrage" renderingMode="canvas"></barrage>
+
+  <view class="container">
+    <view class="setting" hidden="{{!showSetting}}">
+      <view class="setting-item">弹幕设置</view>
+      <view class="setting-item">
+        <view class="item-left">弹幕区域</view>
+        <view class="item-right">
+          <i class="iconfont icon-bofangqi-danmuguan" bindtap="disableDanmu"></i>
+          <i class="iconfont icon-bofangqi-danmudingbukai" bindtap="showTopDanmu"></i>
+          <i class="iconfont icon-bofangqi-danmukai" bindtap="showAllDanmu"></i>
+        </view>
+      </view>
+      <view class="setting-item">
+        <view class="item-left">弹幕字号</view>
+        <view class="item-right">
+          <slider class="slider" min="14" max="28" value="16" active-color="#ADFF2F" background-color="#ccc" bindchange="fontChange" block-size="14" step="1" />
+        </view>
+        <view style="margin-left: 5px;">{{fontSize}}</view>
+      </view>
+      <view class="setting-item">
+        <view class="item-left">弹幕透明度</view>
+        <view class="item-right">
+          <slider class="slider" min="0" max="100" value="75" active-color="#ADFF2F" background-color="#ccc" bindchange="transparentChange" block-size="14" step="1" />
+        </view>
+        <view style="margin-left: 5px;">{{alpha}}</view>
+      </view>
+      <view class="setting-item">
+        <view class="item-left">弹幕周期</view>
+        <view class="item-right">
+          <slider class="slider" min="10" max="20" value="15" active-color="#ADFF2F" background-color="#ccc" bindchange="durationChange" block-size="14" step="1" />
+        </view>
+        <view style="margin-left: 5px;">{{duration}}</view>
+      </view>
+    </view>
+  </view>
 </video>
 
-<button type="primary" bindtap="toggleDanmu">{{open ? '关闭' : '开启'}}弹幕</button>
+<view >
+  <button class="block" type="primary" bindtap="toggleDanmu">{{open ? '关闭' : '开启'}}弹幕</button>
+  <button class="block" type="primary" bindtap="toggleBarrageSetting">{{showSetting ? '关闭' : '开启'}}弹幕设置</button>
+  <input class="send-box" placeholder="在此输入新弹幕" confirm-type="send" bindconfirm="send"></input>
+</view>
+

@@ -30,30 +30,37 @@ class Bullet {
   }
 
   move() {
-    const imageGap = this.image.gap || 4
-
     if (this.image.head && !this.imageHead) {
       const Image = this.canvas.createImage()
       Image.src = this.image.head.src
-      Image.onLoad = () => {
+      Image.onload = () => {
         this.imageHead = Image
+      }
+      Image.onerror = () => {
+        // eslint-disable-next-line no-console
+        console.log(`Fail to load image: ${this.image.head.src}`)
       }
     }
 
     if (this.image.tail && !this.imageTail) {
       const Image = this.canvas.createImage()
       Image.src = this.image.tail.src
-      Image.onLoad = () => {
+      Image.onload = () => {
         this.imageTail = Image
+      }
+      Image.onerror = () => {
+        // eslint-disable-next-line no-console
+        console.log(`Fail to load image: ${this.image.tail.src}`)
       }
     }
 
     if (this.imageHead) {
       const {
         width = this.fontSize,
-        height = this.fontSize
+        height = this.fontSize,
+        gap = 4
       } = this.image.head
-      const x = this.x - imageGap - width
+      const x = this.x - gap - width
       const y = this.y - 0.5 * height
       this.ctx.drawImage(this.imageHead, x, y, width, height)
     }
@@ -61,9 +68,10 @@ class Bullet {
     if (this.imageTail) {
       const {
         width = this.fontSize,
-        height = this.fontSize
-      } = this.image.head
-      const x = this.x + this.textWidth + imageGap
+        height = this.fontSize,
+        gap = 4
+      } = this.image.tail
+      const x = this.x + this.textWidth + gap
       const y = this.y - 0.5 * height
       this.ctx.drawImage(this.imageTail, x, y, width, height)
     }
@@ -155,7 +163,7 @@ class Barrage {
   constructor(opt = {}) {
     const defaultBarrageOpt = {
       font: '10px sans-serif',
-      duration: 10, // 弹幕屏幕停留时长
+      duration: 15, // 弹幕屏幕停留时长
       lineHeight: 1.2,
       padding: [0, 0, 0, 0],
       tunnelHeight: 0,

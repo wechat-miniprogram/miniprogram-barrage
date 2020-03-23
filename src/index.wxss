@@ -3,7 +3,6 @@
   box-sizing: border-box;
   width: 100%;
   height: 100%;
-  z-index: 1000;
   pointer-events: auto;
 }
 
@@ -36,11 +35,11 @@
   opacity: 0.6;
   padding: 0 10px;
   z-index: 1001;
-  
 }
 
 .bullet-item_img {
   max-height: 100%;
+  display: inline-block;
 }
 
 .bullet-item_text {
