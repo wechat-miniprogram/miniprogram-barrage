@@ -1,5 +1,16 @@
-<video id="myVideo" class="video" src="{{}}" loop controls bindfullscreenchange="fullscreenchange" vslide-gesture vslide-gesture-in-fullscreen autoplay enable-play-gesture>
-  <barrage class="barrage" ></barrage>
+<video 
+  id="myVideo" 
+  class="video" 
+  src="{{}}" 
+  loop 
+  controls 
+  bindfullscreenchange="fullscreenchange" 
+  vslide-gesture 
+  vslide-gesture-in-fullscreen 
+  autoplay 
+  enable-play-gesture
+>
+  <barrage class="barrage" renderingMode="dom"></barrage>
 </video>
 
 <button type="primary" bindtap="toggleDanmu">{{open ? '关闭' : '开启'}}弹幕</button>

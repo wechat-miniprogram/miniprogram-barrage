@@ -1,15 +1,30 @@
-import Barrage from './barrage'
+import DomBarrage from './barrage-dom'
+import CanvasBarrage from './barrage-canvas'
 
 Component({
+  options: {
+    addGlobalClass: true,
+  },
+
+  properties: {
+    renderingMode: {
+      type: String,
+      value: 'canvas'
+    }
+  },
+
   methods: {
-    getBarrageInstance(opt) {
+    getBarrageInstance(opt = {}) {
       opt.comp = this
-      this.barrage = new Barrage(opt)
-      return this.barrage
+      this.barrageInstance = this.data.renderingMode === 'dom'
+        ? new DomBarrage(opt)
+        : new CanvasBarrage(opt)
+      return this.barrageInstance
     },
+
     onAnimationend(e) {
       const {tunnelid, bulletid} = e.currentTarget.dataset
-      this.barrage.animationend({
+      this.barrageInstance.animationend({
         tunnelId: tunnelid,
         bulletId: bulletid
       })
@@ -17,7 +32,7 @@ Component({
 
     onTapBullet(e) {
       const {tunnelid, bulletid} = e.currentTarget.dataset
-      this.barrage.tapBullet({
+      this.barrageInstance.tapBullet({
         tunnelId: tunnelid,
         bulletId: bulletid
       })

@@ -13,11 +13,11 @@ Page({
     const barrageComp = this.selectComponent('.barrage')
     this.barrage = barrageComp.getBarrageInstance({
       font: 'bold 16px sans-serif',
-      duration: 10,
+      duration: 15,
       lineHeight: 2,
       mode: 'separate',
       padding: [10, 0, 10, 0],
-      tunnelShow: false,
+      tunnelShow: true,
       range: [0, 1]
     })
   },

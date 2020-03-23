@@ -122,8 +122,6 @@ class Barrage {
   constructor(opt = {}) {
     this._promise = new Promise((resolve) => {
       const defaultBarrageOpt = {
-        width: 300, // 弹幕区域宽度
-        height: 150, // 弹幕区域高度
         duration: 10, // 弹幕动画时长
         lineHeight: 1.2, // 弹幕行高
         padding: [0, 0, 0, 0], // 弹幕区四周留白

@@ -12,13 +12,14 @@
   position: relative;
   display: flex;
   align-items: center;
-  border-top: 1px solid #CCB24D;
+  border-top: 1px dashed #CCB24D;
   width: 100%;
 }
 
 .tunnel-tips {
   display: inline-block;
   margin-left: 10px;
+  color: #CCB24D;
 }
 
 .bullet-item {
