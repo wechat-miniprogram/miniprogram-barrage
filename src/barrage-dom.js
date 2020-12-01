@@ -443,9 +443,10 @@ class Barrage {
   animationend(opt) {
     const {tunnelId, bulletId} = opt
     const tunnel = this.tunnels[tunnelId]
+    if (!tunnel) return
+    
     const bullet = tunnel.bullets[bulletId]
-
-    if (!tunnel || !bullet) return
+    if (!bullet) return
 
     tunnel.removeBullet(bulletId)
     this.addIdleTunnel(tunnelId)
