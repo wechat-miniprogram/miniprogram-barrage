@@ -1,4 +1,9 @@
-const {substring, getRandom, getFontSize} = require('./utils')
+const {
+  substring,
+  getRandom,
+  getFontSize,
+  isArray
+} = require('./utils')
 
 class Bullet {
   constructor(opt = {}) {
@@ -162,10 +167,10 @@ class Barrage {
     this._deferred = []
   }
 
-  _delay(method, args) {
+  _delay(method, ...params) {
     this._deferred.push({
       callback: method,
-      args
+      args: params
     })
   }
 
@@ -298,6 +303,8 @@ class Barrage {
 
   // 添加一批弹幕，轨道满时会被丢弃
   addData(data = []) {
+    if (!isArray(data)) return
+
     if (!this._ready) {
       this._delay('addData', data)
       return
