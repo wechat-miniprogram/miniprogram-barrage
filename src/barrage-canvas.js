@@ -208,7 +208,7 @@ class Barrage {
     this._deferred = []
   }
 
-  _delay(method, args) {
+  _delay(method, ...args) {
     this._deferred.push({
       callback: method,
       args
@@ -370,6 +370,8 @@ class Barrage {
 
   // 添加一批弹幕，轨道满时会被丢弃
   addData(data = []) {
+    if (!isArray(data)) return
+    
     if (!this._ready) {
       this._delay('addData', data)
       return
