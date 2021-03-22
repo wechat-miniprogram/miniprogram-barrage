@@ -410,7 +410,7 @@ class Barrage {
     opt.content = substring(opt.content, this.maxLength)
     const textWidth = this.getTextWidth(opt.content)
     const distance = this.mode === 'overlap' ? this.width + textWidth : this.width
-    opt.textWidth = textWidth
+    opt.textWidth = textWidth + this.safeGap;
     opt.speed = distance / (this.innerDuration * this.fps)
     opt.fontSize = this.fontSize
     opt.x = this.width
